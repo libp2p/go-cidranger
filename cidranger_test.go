@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	rnet "github.com/libp2p/go-cidranger/net"
+	"github.com/stretchr/testify/assert"
 )
 
 /*
@@ -20,6 +20,9 @@ import (
 
 func TestContainsAgainstBaseIPv4(t *testing.T) {
 	testContainsAgainstBase(t, 100000, randIPv4Gen)
+}
+func Test2ContainsAgainstBaseIPv4(t *testing.T) {
+	testContainsAgainstBase2(t, 100000, randIPv4Gen)
 }
 
 func TestContainingNetworksAgaistBaseIPv4(t *testing.T) {
@@ -43,6 +46,29 @@ func TestContainingNetworksAgaistBaseIPv6(t *testing.T) {
 
 func TestCoveredNetworksAgainstBaseIPv6(t *testing.T) {
 	testCoversNetworksAgainstBase(t, 100000, randomIPNetGenFactory(ipV6AWSRangesIPNets))
+}
+
+func testContainsAgainstBase2(t *testing.T, iterations int, ipGen ipGenerator) {
+	if testing.Short() {
+		t.Skip("Skipping memory test in `-short` mode")
+	}
+	rangers := []Ranger{NewTrie2Ranger()}
+	baseRanger := newBruteRanger()
+	for _, ranger := range rangers {
+		configureRangerWithAWSRanges(t, ranger)
+	}
+	configureRangerWithAWSRanges(t, baseRanger)
+
+	for i := 0; i < iterations; i++ {
+		nn := ipGen()
+		expected, err := baseRanger.Contains(nn.ToIP())
+		assert.NoError(t, err)
+		for _, ranger := range rangers {
+			actual, err := ranger.Contains(nn.ToIP())
+			assert.NoError(t, err)
+			assert.Equal(t, expected, actual)
+		}
+	}
 }
 
 func testContainsAgainstBase(t *testing.T, iterations int, ipGen ipGenerator) {
@@ -128,6 +154,9 @@ func testCoversNetworksAgainstBase(t *testing.T, iterations int, netGen networkG
 
 func BenchmarkPCTrieHitIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("52.95.110.1"), NewPCTrieRanger())
+}
+func BenchmarkTrie2HitIPv4UsingAWSRanges(b *testing.B) {
+	benchmarkContainsUsingAWSRanges(b, net.ParseIP("52.95.110.1"), NewTrie2Ranger())
 }
 func BenchmarkBruteRangerHitIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("52.95.110.1"), newBruteRanger())

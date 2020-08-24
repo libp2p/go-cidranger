@@ -24,6 +24,7 @@ func (v *versionedRanger) Insert(entry RangerEntry) error {
 	network := entry.Network()
 	ranger, err := v.getRangerForIP(network.IP)
 	if err != nil {
+		panic(err)
 		return err
 	}
 	return ranger.Insert(entry)
