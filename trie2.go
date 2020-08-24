@@ -36,7 +36,7 @@ func ipNetToKey(ipNet net.IPNet) rangerKey {
 }
 
 func (k rangerKey) String() string {
-	return fmt.Sprintf("%v/%v--%v", k.IP, k.Size, []byte(k.IP))
+	return fmt.Sprintf("%v/%v", k.IP, k.Size)
 }
 
 func (k rangerKey) Equal(r t2.Key) bool {
@@ -100,7 +100,6 @@ type trie2Ranger struct {
 }
 
 func newTrie2Ranger(v rnet.IPVersion) Ranger {
-	// XXX: do we need to pre-add rootnet 0.0.0.0/0 and for ipv6
 	return &trie2Ranger{trie: &t2.Trie{}}
 }
 

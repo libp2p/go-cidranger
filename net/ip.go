@@ -82,11 +82,10 @@ func (n NetworkNumber) ToV6() NetworkNumber {
 func (n NetworkNumber) ToIP() net.IP {
 	ip := make(net.IP, len(n)*BytePerUint32)
 	for i := 0; i < len(n); i++ {
-		idx := i * net.IPv4len
-		binary.BigEndian.PutUint32(ip[idx:idx+net.IPv4len], n[i])
-	}
-	if len(ip) == net.IPv4len {
-		ip = net.IPv4(ip[0], ip[1], ip[2], ip[3])
+		ip[i*BytePerUint32] = byte(n[i] >> 8 * 3)
+		ip[i*BytePerUint32+1] = byte(n[i] >> 8 * 2)
+		ip[i*BytePerUint32+2] = byte(n[i] >> 8 * 1)
+		ip[i*BytePerUint32+3] = byte(n[i] >> 8 * 0)
 	}
 	return ip
 }
