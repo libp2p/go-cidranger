@@ -31,6 +31,10 @@ func ipToKey(ip net.IP) rangerKey {
 	return rangerKey{IP: ip, Size: len(ip) * 8}
 }
 
+func ipNetToKey(ipNet net.IPNet) rangerKey {
+	return rangerEntryToKey(NewBasicRangerEntry(ipNet))
+}
+
 func (k rangerKey) String() string {
 	return fmt.Sprintf("%v/%v--%v", k.IP, k.Size, []byte(k.IP))
 }
@@ -119,9 +123,13 @@ func (r *trie2Ranger) Contains(ip net.IP) (bool, error) {
 
 func (r *trie2Ranger) ContainingNetworks(ip net.IP) ([]RangerEntry, error) {
 	_, found := r.trie.FindSubKeys(ipToKey(ip))
-	q := make([]RangerEntry, len(found))
-	for i, f := range found {
-		q[i] = f.(rangerKey).Entry
+	q := []RangerEntry{}
+	for _, f := range found {
+		e := f.(rangerKey).Entry
+		pn := e.Network()
+		if pn.Contains(ip) {
+			q = append(q, e)
+		}
 	}
 	return q, nil
 }
