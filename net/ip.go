@@ -29,11 +29,11 @@ const (
 var ErrInvalidBitPosition = fmt.Errorf("bit position not valid")
 
 // ErrVersionMismatch is returned upon mismatch in network input versions.
-var ErrVersionMismatch = fmt.Errorf("Network input version mismatch")
+var ErrVersionMismatch = fmt.Errorf("network input version mismatch")
 
 // ErrNoGreatestCommonBit is an error returned when no greatest common bit
 // exists for the cidr ranges.
-var ErrNoGreatestCommonBit = fmt.Errorf("No greatest common bit")
+var ErrNoGreatestCommonBit = fmt.Errorf("no greatest common bit")
 
 // NetworkNumber represents an IP address using uint32 as internal storage.
 // IPv4 usings 1 uint32, while IPv6 uses 4 uint32.
@@ -216,7 +216,6 @@ func (n Network) Contains(nn NetworkNumber) bool {
 	if len(n.Number) != len(nn) {
 		return false
 	}
-	const ones uint32 = 0xFFFFFFFF
 
 	mask1, mask2, mask3, mask4 := mask(n.Mask)
 	switch len(n.Number) {

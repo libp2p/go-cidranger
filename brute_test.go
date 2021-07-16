@@ -156,10 +156,9 @@ func TestCoveredNetworks(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			var expectedEntries []string
-			for _, network := range tc.networks {
-				expectedEntries = append(expectedEntries, network)
-			}
+			expectedEntries = append(expectedEntries, tc.networks...)
 			sort.Strings(expectedEntries)
+
 			_, snet, _ := net.ParseCIDR(tc.search)
 			networks, err := ranger.CoveredNetworks(*snet)
 			assert.NoError(t, err)

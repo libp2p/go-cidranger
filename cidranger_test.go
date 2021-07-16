@@ -129,6 +129,7 @@ func testCoversNetworksAgainstBase(t *testing.T, iterations int, netGen networkG
 func BenchmarkPCTrieHitIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("52.95.110.1"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerHitIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("52.95.110.1"), newBruteRanger())
 }
@@ -136,6 +137,7 @@ func BenchmarkBruteRangerHitIPv4UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieHitIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("2620:107:300f::36b7:ff81"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerHitIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("2620:107:300f::36b7:ff81"), newBruteRanger())
 }
@@ -143,6 +145,7 @@ func BenchmarkBruteRangerHitIPv6UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieMissIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("123.123.123.123"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerMissIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("123.123.123.123"), newBruteRanger())
 }
@@ -150,6 +153,7 @@ func BenchmarkBruteRangerMissIPv4UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieHMissIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("2620::ffff"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerMissIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainsUsingAWSRanges(b, net.ParseIP("2620::ffff"), newBruteRanger())
 }
@@ -157,6 +161,7 @@ func BenchmarkBruteRangerMissIPv6UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieHitContainingNetworksIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("52.95.110.1"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerHitContainingNetworksIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("52.95.110.1"), newBruteRanger())
 }
@@ -164,6 +169,7 @@ func BenchmarkBruteRangerHitContainingNetworksIPv4UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieHitContainingNetworksIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("2620:107:300f::36b7:ff81"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerHitContainingNetworksIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("2620:107:300f::36b7:ff81"), newBruteRanger())
 }
@@ -171,6 +177,7 @@ func BenchmarkBruteRangerHitContainingNetworksIPv6UsingAWSRanges(b *testing.B) {
 func BenchmarkPCTrieMissContainingNetworksIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("123.123.123.123"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerMissContainingNetworksIPv4UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("123.123.123.123"), newBruteRanger())
 }
@@ -178,6 +185,7 @@ func BenchmarkBruteRangerMissContainingNetworksIPv4UsingAWSRanges(b *testing.B) 
 func BenchmarkPCTrieHMissContainingNetworksIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("2620::ffff"), NewPCTrieRanger())
 }
+
 func BenchmarkBruteRangerMissContainingNetworksIPv6UsingAWSRanges(b *testing.B) {
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("2620::ffff"), newBruteRanger())
 }
@@ -207,9 +215,7 @@ type ipGenerator func() rnet.NetworkNumber
 func randIPv4Gen() rnet.NetworkNumber {
 	return rnet.NetworkNumber{rand.Uint32()}
 }
-func randIPv6Gen() rnet.NetworkNumber {
-	return rnet.NetworkNumber{rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32()}
-}
+
 func curatedAWSIPv6Gen() rnet.NetworkNumber {
 	randIdx := rand.Intn(len(ipV6AWSRangesIPNets))
 
@@ -248,9 +254,11 @@ type IPv6Prefix struct {
 	Service  string `json:"service"`
 }
 
-var awsRanges *AWSRanges
-var ipV4AWSRangesIPNets []*net.IPNet
-var ipV6AWSRangesIPNets []*net.IPNet
+var (
+	awsRanges           *AWSRanges
+	ipV4AWSRangesIPNets []*net.IPNet
+	ipV6AWSRangesIPNets []*net.IPNet
+)
 
 func loadAWSRanges() *AWSRanges {
 	file, err := ioutil.ReadFile("./testdata/aws_ip_ranges.json")

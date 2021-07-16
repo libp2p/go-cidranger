@@ -251,6 +251,10 @@ func (p *prefixTrie) insert(network rnet.Network, entry RangerEntry) (bool, erro
 	// Check whether it is necessary to insert additional path prefix between current trie and existing child,
 	// in the case that inserted network diverges on its path to existing child.
 	lcb, err := network.LeastCommonBitPosition(existingChild.network)
+	if err != nil {
+		return false, err
+	}
+
 	divergingBitPos := int(lcb) - 1
 	if divergingBitPos > existingChild.targetBitPosition() {
 		pathPrefix := newPathprefixTrie(network, p.totalNumberOfBits()-lcb)

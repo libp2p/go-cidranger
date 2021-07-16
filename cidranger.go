@@ -45,10 +45,10 @@ import (
 )
 
 // ErrInvalidNetworkInput is returned upon invalid network input.
-var ErrInvalidNetworkInput = fmt.Errorf("Invalid network input")
+var ErrInvalidNetworkInput = fmt.Errorf("invalid network input")
 
 // ErrInvalidNetworkNumberInput is returned upon invalid network input.
-var ErrInvalidNetworkNumberInput = fmt.Errorf("Invalid network number input")
+var ErrInvalidNetworkNumberInput = fmt.Errorf("invalid network number input")
 
 // AllIPv4 is a IPv4 CIDR that contains all networks
 var AllIPv4 = parseCIDRUnsafe("0.0.0.0/0")
