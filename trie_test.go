@@ -2,12 +2,13 @@ package cidranger
 
 import (
 	"encoding/binary"
-	detectrace "github.com/ipfs/go-detect-race"
 	"math/rand"
 	"net"
 	"runtime"
 	"testing"
 	"time"
+
+	detectrace "github.com/ipfs/go-detect-race"
 
 	rnet "github.com/libp2p/go-cidranger/net"
 	"github.com/stretchr/testify/assert"

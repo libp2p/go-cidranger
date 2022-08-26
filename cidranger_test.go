@@ -2,9 +2,9 @@ package cidranger
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"math/rand"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -261,7 +261,7 @@ var (
 )
 
 func loadAWSRanges() *AWSRanges {
-	file, err := ioutil.ReadFile("./testdata/aws_ip_ranges.json")
+	file, err := os.ReadFile("./testdata/aws_ip_ranges.json")
 	if err != nil {
 		panic(err)
 	}
