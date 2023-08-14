@@ -1,6 +1,6 @@
 module github.com/libp2p/go-cidranger
 
-go 1.19
+go 1.20
 
 require (
 	github.com/ipfs/go-detect-race v0.0.1
