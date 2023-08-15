@@ -552,11 +552,11 @@ func GenLeafIPNet(ip net.IP) net.IPNet {
 
 // GenIPV4 generates an IPV4 address
 func GenIPV4() net.IP {
-	rand.Seed(time.Now().UnixNano())
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var min, max int64
 	min = 1
 	max = 4294967295
-	nn := rand.Int63n(max-min) + min
+	nn := r.Int63n(max-min) + min
 	ip := make(net.IP, 4)
 	binary.BigEndian.PutUint32(ip, uint32(nn))
 	return ip
