@@ -258,7 +258,7 @@ var (
 	awsRanges           *AWSRanges
 	ipV4AWSRangesIPNets []*net.IPNet
 	ipV6AWSRangesIPNets []*net.IPNet
-	r                   *Rand
+	r                   *rand.Rand
 )
 
 func loadAWSRanges() *AWSRanges {
