@@ -213,11 +213,11 @@ func benchmarkContainingNetworksUsingAWSRanges(tb testing.TB, nn net.IP, ranger 
 type ipGenerator func() rnet.NetworkNumber
 
 func randIPv4Gen() rnet.NetworkNumber {
-	return rnet.NetworkNumber{rand.Uint32()}
+	return rnet.NetworkNumber{r.Uint32()}
 }
 
 func curatedAWSIPv6Gen() rnet.NetworkNumber {
-	randIdx := rand.Intn(len(ipV6AWSRangesIPNets))
+	randIdx := r.Intn(len(ipV6AWSRangesIPNets))
 
 	// Randomly generate an IP somewhat near the range.
 	network := ipV6AWSRangesIPNets[randIdx]
@@ -225,7 +225,7 @@ func curatedAWSIPv6Gen() rnet.NetworkNumber {
 	ones, bits := network.Mask.Size()
 	zeros := bits - ones
 	nnPartIdx := zeros / rnet.BitsPerUint32
-	nn[nnPartIdx] = rand.Uint32()
+	nn[nnPartIdx] = r.Uint32()
 	return nn
 }
 
@@ -233,7 +233,7 @@ type networkGenerator func() rnet.Network
 
 func randomIPNetGenFactory(pool []*net.IPNet) networkGenerator {
 	return func() rnet.Network {
-		return rnet.NewNetwork(*pool[rand.Intn(len(pool))])
+		return rnet.NewNetwork(*pool[r.Intn(len(pool))])
 	}
 }
 
@@ -258,6 +258,7 @@ var (
 	awsRanges           *AWSRanges
 	ipV4AWSRangesIPNets []*net.IPNet
 	ipV6AWSRangesIPNets []*net.IPNet
+	r                   *rand.Rand
 )
 
 func loadAWSRanges() *AWSRanges {
@@ -296,5 +297,5 @@ func init() {
 		_, network, _ := net.ParseCIDR(prefix.IPPrefix)
 		ipV4AWSRangesIPNets = append(ipV4AWSRangesIPNets, network)
 	}
-	rand.Seed(time.Now().Unix())
+	r = rand.New(rand.NewSource(time.Now().Unix()))
 }
