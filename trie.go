@@ -136,6 +136,16 @@ func (p *prefixTrie) CoveredNetworks(network net.IPNet) ([]RangerEntry, error) {
 	return p.coveredNetworks(net)
 }
 
+// CoversNetwork returns boolean indicating whether given ipnet is covered by any
+// of the inserted networks.
+func (p *prefixTrie) CoversNetwork(network net.IPNet) (bool, error) {
+	net := rnet.NewNetwork(network)
+	if net.Number == nil {
+		return false, ErrInvalidNetworkNumberInput
+	}
+	return p.coversNetwork(net)
+}
+
 // Len returns number of networks in ranger.
 func (p *prefixTrie) Len() int {
 	return p.size
@@ -227,6 +237,27 @@ func (p *prefixTrie) coveredNetworks(network rnet.Network) ([]RangerEntry, error
 		}
 	}
 	return results, nil
+}
+
+func (p *prefixTrie) coversNetwork(network rnet.Network) (bool, error) {
+	if !p.network.Covers(network) {
+		return false, nil
+	}
+	if p.hasEntry() {
+		return true, nil
+	}
+	if p.targetBitPosition() < 0 {
+		return false, nil
+	}
+	bit, err := p.targetBitFromIP(network.Number)
+	if err != nil {
+		return false, err
+	}
+	child := p.children[bit]
+	if child != nil {
+		return child.coversNetwork(network)
+	}
+	return false, nil
 }
 
 func (p *prefixTrie) insert(network rnet.Network, entry RangerEntry) (bool, error) {
