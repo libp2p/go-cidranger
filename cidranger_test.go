@@ -13,9 +13,9 @@ import (
 )
 
 /*
- ******************************************************************
- Test Contains/ContainingNetworks against basic brute force ranger.
- ******************************************************************
+ ************************************************************************************************
+ Test Contains/ContainingNetworks/CoveredNetworks/CoversNetwork against basic brute force ranger.
+ ************************************************************************************************
 */
 
 func TestContainsAgainstBaseIPv4(t *testing.T) {
@@ -28,6 +28,10 @@ func TestContainingNetworksAgaistBaseIPv4(t *testing.T) {
 
 func TestCoveredNetworksAgainstBaseIPv4(t *testing.T) {
 	testCoversNetworksAgainstBase(t, 100000, randomIPNetGenFactory(ipV4AWSRangesIPNets))
+}
+
+func TestCoversNetworkAgainstBaseIPv4(t *testing.T) {
+	testCoversNetworkAgainstBase(t, 100000, randomIPNetGenFactory(ipV4AWSRangesIPNets))
 }
 
 // IPv6 spans an extremely large address space (2^128), randomly generated IPs
@@ -43,6 +47,10 @@ func TestContainingNetworksAgaistBaseIPv6(t *testing.T) {
 
 func TestCoveredNetworksAgainstBaseIPv6(t *testing.T) {
 	testCoversNetworksAgainstBase(t, 100000, randomIPNetGenFactory(ipV6AWSRangesIPNets))
+}
+
+func TestCoversNetworksAgainstBaseIPv6(t *testing.T) {
+	testCoversNetworkAgainstBase(t, 100000, randomIPNetGenFactory(ipV6AWSRangesIPNets))
 }
 
 func testContainsAgainstBase(t *testing.T, iterations int, ipGen ipGenerator) {
@@ -120,6 +128,29 @@ func testCoversNetworksAgainstBase(t *testing.T, iterations int, netGen networkG
 	}
 }
 
+func testCoversNetworkAgainstBase(t *testing.T, iterations int, netGen networkGenerator) {
+	if testing.Short() {
+		t.Skip("Skipping memory test in `-short` mode")
+	}
+	rangers := []Ranger{NewPCTrieRanger()}
+	baseRanger := newBruteRanger()
+	for _, ranger := range rangers {
+		configureRangerWithAWSRanges(t, ranger)
+	}
+	configureRangerWithAWSRanges(t, baseRanger)
+
+	for i := 0; i < iterations; i++ {
+		network := netGen()
+		expected, err := baseRanger.CoversNetwork(network.IPNet())
+		assert.NoError(t, err)
+		for _, ranger := range rangers {
+			actual, err := ranger.CoversNetwork(network.IPNet())
+			assert.NoError(t, err)
+			assert.Equal(t, expected, actual)
+		}
+	}
+}
+
 /*
  ******************************************************************
  Benchmarks.
@@ -190,6 +221,50 @@ func BenchmarkBruteRangerMissContainingNetworksIPv6UsingAWSRanges(b *testing.B) 
 	benchmarkContainingNetworksUsingAWSRanges(b, net.ParseIP("2620::ffff"), newBruteRanger())
 }
 
+func BenchmarkPCTrieHitCoversNetworkIPv4UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("52.95.110.1/24")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, NewPCTrieRanger())
+}
+func BenchmarkBruteRangerHitCoversNetworkIPv4UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("52.95.110.1/24")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, newBruteRanger())
+}
+
+func BenchmarkPCTrieHitCoversNetworkIPv6UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("2600:1f12::/36")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, NewPCTrieRanger())
+}
+func BenchmarkBruteRangerHitCoversNetworkIPv6UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("2600:1f12::/36")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, newBruteRanger())
+}
+
+func BenchmarkPCTrieMissCoversNetworkIPv4UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("212.46.55.0/24")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, NewPCTrieRanger())
+}
+func BenchmarkBruteRangerMissCoversNetworkIPv4UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("212.46.55.0/24")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, newBruteRanger())
+}
+
+func BenchmarkPCTrieMissCoversNetworkIPv6UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("2a12:bc0::/48")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, NewPCTrieRanger())
+}
+func BenchmarkBruteRangerMissCoversNetworkIPv6UsingAWSRanges(b *testing.B) {
+	_, ipNet, err := net.ParseCIDR("2a12:bc0::/48")
+	assert.NoError(b, err)
+	benchmarkCoversNetworkUsingAWSRanges(b, *ipNet, newBruteRanger())
+}
+
 func benchmarkContainsUsingAWSRanges(tb testing.TB, nn net.IP, ranger Ranger) {
 	configureRangerWithAWSRanges(tb, ranger)
 	for n := 0; n < tb.(*testing.B).N; n++ {
@@ -201,6 +276,13 @@ func benchmarkContainingNetworksUsingAWSRanges(tb testing.TB, nn net.IP, ranger 
 	configureRangerWithAWSRanges(tb, ranger)
 	for n := 0; n < tb.(*testing.B).N; n++ {
 		ranger.ContainingNetworks(nn)
+	}
+}
+
+func benchmarkCoversNetworkUsingAWSRanges(tb testing.TB, network net.IPNet, ranger Ranger) {
+	configureRangerWithAWSRanges(tb, ranger)
+	for n := 0; n < tb.(*testing.B).N; n++ {
+		ranger.CoversNetwork(network)
 	}
 }
 

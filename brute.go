@@ -108,6 +108,23 @@ func (b *bruteRanger) CoveredNetworks(network net.IPNet) ([]RangerEntry, error) 
 	return results, nil
 }
 
+// CoversNetwork returns boolean indicating whether given ipnet is covered by any
+// of the inserted networks.
+func (b *bruteRanger) CoversNetwork(network net.IPNet) (bool, error) {
+	entries, err := b.getEntriesByVersion(network.IP)
+	if err != nil {
+		return false, err
+	}
+	testNetwork := rnet.NewNetwork(network)
+	for _, entry := range entries {
+		entryNetwork := rnet.NewNetwork(entry.Network())
+		if entryNetwork.Covers(testNetwork) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // Len returns number of networks in ranger.
 func (b *bruteRanger) Len() int {
 	return len(b.ipV4Entries) + len(b.ipV6Entries)
